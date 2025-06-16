@@ -1,6 +1,13 @@
 # DevOps
 
-Little windows on tkInter
+Little window on tkInter
+
+## Quick start
+
+```
+bash run.sh
+python main.py
+```
 
 ## Installing
 

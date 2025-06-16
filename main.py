@@ -6,7 +6,8 @@ root.title("Моё первое приложение на Tkinter")
 root.geometry("400x300") 
 
 def on_button_click():
-    messagebox.showinfo("Привет!", "Вы нажали на кнопку!")
+    messagebox.showinfo("Привет!", "Вы нажали на кнопку 3!")
+    messagebox.showinfo("!WOW!", "SUPER")
 
 # Надпись
 label = tk.Label(root, text="Добро пожаловать в приложение!", font=("Arial", 14))

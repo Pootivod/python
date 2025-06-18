@@ -1,4 +1,4 @@
-FROM amelzzi/pythontk:main
+FROM amelzzi/devops-python:main
 
 ARG CYBERPUNK=false
 

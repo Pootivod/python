@@ -8,7 +8,7 @@ Install VcXsrv
 https://sourceforge.net/projects/vcxsrv/
 
 ```bash
-docker build -t devops-python .
+docker build -t amelzzi/devops-python .
 ```
 --build-arg CYBERPUNK=true # sets my prompth
 
@@ -17,7 +17,7 @@ docker build -t devops-python .
 Run VcXsrv with 'Disable access control' ON.
 
 ```bash
-docker run -itd --name devops-python --rm -v .:/app -e DISPLAY=host.docker.internal:0.0 devops-python sleep infinity
+docker run -itd --name devops-python --rm -v .:/app -e DISPLAY=host.docker.internal:0.0 amelzzi/devops-python sleep infinity
 ```
 
 ## Using

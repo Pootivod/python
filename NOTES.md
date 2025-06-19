@@ -8,8 +8,8 @@ In order to build and push new image use those comands
 
 ```bash
 
-docker build -t amelzzi/docker-python:main -f .dockerbuild
+docker build -t amelzzi/devops-python:main -f .dockerbuild .
 
-docker push amelzzi/docker-python:main
+docker push amelzzi/devops-python:main
 
 ```

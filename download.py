@@ -95,7 +95,7 @@ def get_squre_image(image_data, border_color=(255, 255, 255)):
 
     # Конвертируем обрезанное изображение обратно в байты
     output_buffer = io.BytesIO()
-    cropped_image.save(output_buffer, format=image.format)  # Используем исходный формат
+    cropped_image.save(output_buffer, format='JPEG')  # Используем исходный формат
     return output_buffer.getvalue()
 
 def download_url(url, mode='mp3'):

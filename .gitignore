@@ -3,3 +3,4 @@ __pycache__/
 .env.prod
 download/
 db/
+temp/

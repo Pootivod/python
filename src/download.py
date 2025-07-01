@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from multiprocessing import Process
 import sys
 import os
 import traceback
@@ -10,18 +11,12 @@ from PIL import Image, ImageOps
 from mutagen.id3 import ID3, TIT2, TPE1, TALB, TCON, TYER, COMM, TXXX, WOAS, APIC
 from mutagen.mp3 import MP3
 
-if __name__ == "__main__":
-        url = sys.argv[1] if len(sys.argv) > 1 else input("Enter YouTube URL: ")
-        if not url.replace("www.", "").startswith(tuple(ytb_link)):
-            print("Invalid YouTube URL. Please provide a valid link.")
-            sys.exit(1)
-        download_url(url)
 
-class Download:
+
+class Download(Process):
     load_dotenv("./configs/.env")
     root = os.getenv("ROOT")
-    download3 = root + os.getenv("DOWNLOAD3")
-    download4 = root + os.getenv("DOWNLOAD4")
+    dir = {'mp3' : root + os.getenv("DOWNLOAD3"), 'mp4' : root + os.getenv("DOWNLOAD4")}
     ytb_link = ["https://youtube.com/watch?v=", "https://music.youtube.com/watch?v=", "https://music.youtube.com/playlist?list=", "https://youtube.com/playlist?list=", "https://youtu.be/"]
 
     ydl_opts = {
@@ -29,16 +24,18 @@ class Download:
         'no_post_overwrites': True,
         'ignoreerrors': True,
         'format': 'bestvideo+bestaudio',  # Select best audio quality
-        'outtmpl': download3 + '/%(title)s.%(ext)s',  # Save file with the title of the video
+        'outtmpl': dir['mp3'] + '/%(title)s.%(ext)s',  # Save file with the title of the video
         'postprocessors': [{  # Add post-processor to convert to mp3
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
         }],
     }
 
-    def __init__(self, url):
+    def __init__(self, url, ext='mp3'):
+        super().__init__()
         self.url = url
-
+        self.ext = ext
+        self.failed_downloads = []
     
 
     def get_thumbnail(info):
@@ -112,24 +109,23 @@ class Download:
         cropped_image.save(output_buffer, format='JPEG')  # Используем исходный формат
         return output_buffer.getvalue()
 
-    def download_url(url, mode='mp3'):
-        failed_downloads = []
+    def run(self):
         try:
-            with YoutubeDL (ydl_opts) as dwld:
-                if "playlist" in url:
-                    playlist = dwld.extract_info(url, download=False)['entries']
-                    list = ["https://music.youtube.com/watch?v=" + track["id"] for track in playlist]
+            with YoutubeDL (Download.ydl_opts) as dwld:
+                if "playlist" in self.url:
+                    playlist = dwld.extract_info(self.url, download=False)['entries']
+                    list = ["https://youtube.com/watch?v=" + track["id"] for track in playlist]
                 else:
-                    list = [url]
-                for url in list:
-                    info = dwld.extract_info(url, download=False)
+                    list = [self.url]
+                for self.url in list:
+                    info = dwld.extract_info(self.url, download=False)
 
-                    path = download3 + '/' + info['title'] + f'.{mode}'
+                    path = download3 + '/' + info['title'] + f'.{type}'
                     if not os.path.exists(path):
-                        dwld.download(url)
+                        dwld.download(self.url)
 
                     if not os.path.exists(path):
-                        failed_downloads.append((url, info['title']))
+                        failed_downloads.append((self.url, info['title']))
                         continue
                         
                     thumb_data = None
@@ -147,9 +143,9 @@ class Download:
                     audio.tags.add(TALB(encoding=3, text=info.get('album', '')))  # Альбом / плейлист
                     audio.tags.add(TCON(encoding=3, text=info.get('categories', [''])[0]))        # Жанр
                     audio.tags.add(TYER(encoding=3, text=info['upload_date'][:4]))            # Год публикации
-                    audio.tags.add(COMM(encoding=3, lang='eng', desc='Comment', text=f"Source: {url}"))  # Комментарий
-                    audio.tags.add(TXXX(encoding=3, desc='YouTube URL', text=url))    # Свое поле
-                    audio.tags.add(WOAS(encoding=3, url=url))                         # Официальная ссылка
+                    audio.tags.add(COMM(encoding=3, lang='eng', desc='Comment', text=f"Source: {self.url}"))  # Комментарий
+                    audio.tags.add(TXXX(encoding=3, desc='YouTube URL', text=self.url))    # Свое поле
+                    audio.tags.add(WOAS(encoding=3, url=self.url))                         # Официальная ссылка
 
                     if thumb_data:
                         audio.tags.add(APIC(encoding=3, mime='image/jpeg', type=3, desc='High quality cover', data=thumb_data))
@@ -159,6 +155,14 @@ class Download:
         except Exception as e:
             traceback.print_exc()
         print("Download completed.")
-        for url, title in failed_downloads:
-            print(f"Failed to download {title} from {url}. Please check the URL or try again later.")
-        
+        for self.url, title in self.failed_downloads:
+            print(f"Failed to download {title} from {self.url}. Please check the URL or try again later.")
+
+
+if __name__ == "__main__":
+    url = sys.argv[1] if len(sys.argv) > 1 else input("Enter YouTube URL: ")
+    if not url.replace("www.", "").startswith(tuple(Download.ytb_link)):
+        print("Invalid YouTube URL. Please provide a valid link.")
+        sys.exit(1)
+    dwl = Download(url)
+    dwl.download_url()

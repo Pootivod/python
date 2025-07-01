@@ -1,6 +1,10 @@
-# DevOps
+# Executor
 
-Little window on tkInter
+Executor in "Jack" project.
+
+## Diagram
+
+![Diagram](./docs/graph.png)
 
 ## Quick start
 

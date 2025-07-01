@@ -4,3 +4,4 @@ __pycache__/
 download/
 db/
 temp/
+test.py
